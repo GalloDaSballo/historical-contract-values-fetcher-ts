@@ -83,7 +83,7 @@ async function getAllData() {
   const data = { data: PRICE_ARRAY };
   const jsonData = JSON.stringify(data);
 
-  syncWriteFile("priceArray.json", jsonData);
+  syncWriteFile(`${FEED_TO_CHECK}.json`, `${CHAIN_ID}` ,jsonData);
 }
 
 getAllData();
