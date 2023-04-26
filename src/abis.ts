@@ -1,4 +1,4 @@
-export const aggregratorV3Abi = [
+export const AGGREGRATOR_V3_ABI = [
     {
       "inputs": [],
       "name": "decimals",

@@ -10,13 +10,10 @@ Jest: Confident Testing
 JSDoc: Free Documentation (as long as you add comments)
 
 ## Usage
-
-Use it as template
-
-Build your own stuff
+Run `yarn` to install all dependencies. Create a `.env` file and add all env variables specified in index.ts to it. Run `yarn start` to run the script. 
 
 ## Scripts
-
+`yarn start`
 ### build
 Build the package with TS
 
