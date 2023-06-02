@@ -1,8 +1,6 @@
 import * as dotenv from "dotenv";
 import { Network, Alchemy } from "alchemy-sdk";
 import syncWriteFile from "./file";
-// Setup: npm install alchemy-sdk
-// Github: https://github.com/alchemyplatform/alchemy-sdk-js
 
 dotenv.config();
 
