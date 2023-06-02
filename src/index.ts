@@ -10,7 +10,8 @@ const CONTRACT_ADDRESS = "0xBA485b556399123261a5F9c95d413B4f93107407";
 const CHAIN_ID = 1;
 const BLOCKS_IN_THE_PAST = 1; // 60 * 60 * 24 / 12
 const START_BLOCK = 17381949;
-const SIGNATURE = "0x77c7b8fc"; // 77c7b8fc  =>  getPricePerFullShare()
+const SIGNATURE = "0x77c7b8fc"; // 77c7b8fc  =>  getPricePerFullShare() // Use this: https://piyolab.github.io/playground/ethereum/getEncodedFunctionSignature/
+// Or this: https://openchain.xyz/signatures
 
 // Optional config object, but defaults to demo api-key and eth-mainnet.
 const settings = {
