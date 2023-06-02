@@ -17,6 +17,11 @@ export default function syncWriteFile(
 
   // Create the directory if it does not already exist
   // TODO: Create output first
+  const outputFolder = join(back, `/output/`);
+  if (!existsSync(outputFolder)) {
+    mkdirSync(outputFolder);
+  }
+
   const directory = join(back, `/output/${fileDirectory}`);
   if (!existsSync(directory)) {
     mkdirSync(directory);

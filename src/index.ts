@@ -8,7 +8,7 @@ dotenv.config();
 
 const CONTRACT_ADDRESS = "0xBA485b556399123261a5F9c95d413B4f93107407";
 const CHAIN_ID = 1;
-const BLOCKS_IN_THE_PAST = 7200; // 60 * 60 * 24 / 12
+const BLOCKS_IN_THE_PAST = 1; // 60 * 60 * 24 / 12
 const START_BLOCK = 17381949;
 
 // Optional config object, but defaults to demo api-key and eth-mainnet.
