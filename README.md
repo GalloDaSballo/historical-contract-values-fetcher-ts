@@ -1,30 +1,32 @@
-# Typescript Package Starter
-
-A starter template to start your package with typescript
-
-It uses typescript, eslint and jest
-
-TS: Easy coding
-EsLint: Easy Formatting
-Jest: Confident Testing
-JSDoc: Free Documentation (as long as you add comments)
+# historical-contract-values-fetcher-ts
 
 ## Usage
-Run `yarn` to install all dependencies. Create a `.env` file and add all env variables specified in index.ts to it. Run `yarn start` to run the script. 
 
-## Scripts
-`yarn start`
-### build
-Build the package with TS
+- Add .env
+- Change `CONSTANTS`
+- Send it
 
-### test
-Run jest on your test files
+## Requirements
 
-### lint
-Lint your files
+Alchemy Key
 
-### lint:fix
-Lint and fix what can be fixed
+Patience
 
-### doc
-Generate docs with JsDoc
+
+
+## Output
+Is of type 
+
+```ts
+interface Reads {
+  block: number;
+  value: number;
+}
+```
+
+
+## Advanced
+
+If you can handle more requests (pro RPC)
+
+Change `ROUND_PER_CALL` to a high number, which will have concurrent requests to speed the process up
