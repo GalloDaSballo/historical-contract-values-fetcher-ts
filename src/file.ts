@@ -1,8 +1,12 @@
-import { readFileSync, existsSync, writeFileSync, mkdirSync } from "fs";
+import { existsSync, writeFileSync, mkdirSync } from "fs";
 import { join, resolve } from "path";
 
 // ✅ write to file SYNCHRONOUSLY
-export default function syncWriteFile(fileName: string, fileDirectory: string, data: any) {
+export default function syncWriteFile(
+  fileName: string,
+  fileDirectory: string,
+  data: any
+) {
   /**
    * flags:
    *  - w = Open file for reading and writing. File is created if not exists
@@ -10,8 +14,9 @@ export default function syncWriteFile(fileName: string, fileDirectory: string, d
    */
   const back = resolve(__dirname, "..");
   const path = join(back, `/output/${fileDirectory}`, fileName);
-  
+
   // Create the directory if it does not already exist
+  // TODO: Create output first
   const directory = join(back, `/output/${fileDirectory}`);
   if (!existsSync(directory)) {
     mkdirSync(directory);

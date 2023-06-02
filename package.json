@@ -10,7 +10,9 @@
   "main": "lib/index.js",
   "license": "MIT",
   "scripts": {
+    "debug": " ts-node ./src/debug.ts",
     "start": " ts-node ./src/index.ts",
+    "dev": " ts-node ./src/index.ts",
     "build": "tsc",
     "test": "jest",
     "lint": "eslint src/. --ext ts --ext tsx --ext js",
@@ -18,8 +20,8 @@
     "doc": "tsc && jsdoc -c ./.jsdoc.json"
   },
   "dependencies": {
+    "alchemy-sdk": "^2.8.3",
     "dotenv": "^16.0.3",
-    "ethers": "^5",
     "ts-node": "^10.9.1"
   },
   "devDependencies": {

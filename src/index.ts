@@ -1,89 +1,83 @@
-import { Contract, ethers } from "ethers";
-import syncWriteFile from "./file";
-import { AGGREGRATOR_V3_ABI } from "./abis";
-import { ChainLinkReturnData } from "./types";
 import * as dotenv from "dotenv";
+import { Network, Alchemy } from "alchemy-sdk";
+import syncWriteFile from "./file";
+// Setup: npm install alchemy-sdk
+// Github: https://github.com/alchemyplatform/alchemy-sdk-js
+
 dotenv.config();
 
-const CHAIN_ID = 1; // chain id
-const FEED_TO_CHECK = "0x72AFAECF99C9d9C8215fF44C77B94B99C28741e8"; // address
-const TIME_TO_CHECK_BACK_TO = 100; // value in seconds, FOR EXAMPLE 100 SECONDS BACK IN TIME 
+const CONTRACT_ADDRESS = "0xBA485b556399123261a5F9c95d413B4f93107407";
+const CHAIN_ID = 1;
+const BLOCKS_IN_THE_PAST = 7200; // 60 * 60 * 24 / 12
+const START_BLOCK = 17381949;
 
-const RPC_URLS: Record<number, string> = {
-  1: `https://eth-mainnet.g.alchemy.com/v2/${process.env.ETH_MAINNET_ALCHEMY_KEY}`,
-  5: `https://eth-goerli.g.alchemy.com/v2/${process.env.GOERLI_ALCHEMY_KEY}`,
-  137: `https://polygon-mainnet.g.alchemy.com/v2/${process.env.POLYGON_MAINNET_ALCHEMY_KEY}`,
-  42161: `https://arb-mainnet.g.alchemy.com/v2/${process.env.ARBITRUM_MAINNET_ALCHEMY_KEY}`,
-  10: `https://opt-mainnet.g.alchemy.com/v2/${process.env.OPTIMISM_MAINNET_ALCHEMY_KEY}`,
-  11155111: `https://eth-sepolia.g.alchemy.com/v2/${process.env.SEPOLIA_ALCHEMY_KEY}`,
+// Optional config object, but defaults to demo api-key and eth-mainnet.
+const settings = {
+  apiKey: process.env.ALCHEMY_KEY, // Replace with your Alchemy API Key.
+  network: Network.ETH_MAINNET, // Replace with your network.
 };
-const ALCHEMY_PROVIDER = new ethers.providers.JsonRpcProvider(
-  RPC_URLS[CHAIN_ID]
-);
-const CHAIN_LINK_AGGREGRATOR_INSTANCE = new Contract(
-  FEED_TO_CHECK,
-  AGGREGRATOR_V3_ABI,
-  ALCHEMY_PROVIDER
-);
+const alchemy = new Alchemy(settings);
 
-const PRICE_ARRAY = [];
-
-async function getLatestRoundData() {
-  const call = await CHAIN_LINK_AGGREGRATOR_INSTANCE.latestRoundData();
-  const roundId = call.roundId;
-  const timeOfUpdate = call.updatedAt;
-
-  return { roundId, timeOfUpdate };
+interface Reads {
+  block: number;
+  value: number;
 }
 
-async function getRoundData(round: BigInt) {
-  const call = await CHAIN_LINK_AGGREGRATOR_INSTANCE.getRoundData(round);
-  return call;
-}
+const makeRequest = async (blockId) => {
+  // Make a sample eth_call
+  try {
+    const res = await alchemy.core.call(
+      {
+        to: CONTRACT_ADDRESS,
+        gasPrice: "0x9184e72a000",
+        data: "0x77c7b8fc",
+        // 77c7b8fc  =>  getPricePerFullShare()
+      },
+      blockId
+    );
+    console.log("res", res);
+    return res;
+  } catch (err) {
+    return -1;
+  }
+};
 
-async function getVersion() {
-  const call = await CHAIN_LINK_AGGREGRATOR_INSTANCE.version();
-  console.log(ethers.BigNumber.from(call).toString());
-  return call;
-}
+const READS_ARRAY = [];
 
 async function getAllData() {
-  var { roundId, timeOfUpdate } = await getLatestRoundData();
-  var currentPriceDataReturnedTime = Number(
-    ethers.BigNumber.from(timeOfUpdate).toString()
-  );
-  const timestampToStopAt =
-    Number(ethers.BigNumber.from(timeOfUpdate).toString()) -
-    TIME_TO_CHECK_BACK_TO;
+  let currentBlock = START_BLOCK - 1;
+  const endBlock = currentBlock - BLOCKS_IN_THE_PAST;
+  while (currentBlock > endBlock) {
+    const currentBlocks = [];
+    const ROUND_PER_CALL = 50;
 
-  while (currentPriceDataReturnedTime > timestampToStopAt) {
-    var roundData = await getRoundData(roundId);
-    currentPriceDataReturnedTime = Number(
-      ethers.BigNumber.from(roundData.updatedAt).toString()
+    console.log("ROUND_PER_CALL", ROUND_PER_CALL);
+    console.log("roundId", currentBlock);
+    for (let i = currentBlock; i > currentBlock - ROUND_PER_CALL; i--) {
+      currentBlocks.push(i);
+    }
+
+    console.log("currentBlocks", currentBlocks);
+    const res = await Promise.all(
+      await currentBlocks.map(async (block) => {
+        return await { value: await makeRequest(block), block };
+      })
     );
 
-    if (currentPriceDataReturnedTime < timestampToStopAt) break;
+    for (const entry of res) {
+      // @ts-ignore
+      entry.value = parseInt(entry.value, 16);
+      READS_ARRAY.push(entry);
+    }
 
-    const formattedRoundDataObject: ChainLinkReturnData = {
-      roundId: ethers.BigNumber.from(roundData.roundId).toString(),
-      answer: ethers.BigNumber.from(roundData.answer).toString(),
-      startedAt: ethers.BigNumber.from(roundData.startedAt).toString(),
-      updatedAt: ethers.BigNumber.from(roundData.updatedAt).toString(),
-      answeredInRound: ethers.BigNumber.from(
-        roundData.answeredInRound
-      ).toString(),
-    };
-
-    PRICE_ARRAY.push(formattedRoundDataObject);
-    //REDUCE THE ROUND NUMBER
-    roundId = BigInt(roundId) - BigInt("1");
+    currentBlock -= ROUND_PER_CALL;
   }
 
-  //write to file
-  const data = { data: PRICE_ARRAY };
+  // write to file
+  const data = READS_ARRAY;
   const jsonData = JSON.stringify(data);
 
-  syncWriteFile(`${FEED_TO_CHECK}.json`, `${CHAIN_ID}` ,jsonData);
+  syncWriteFile(`${CONTRACT_ADDRESS}.json`, `${CHAIN_ID}`, jsonData);
 }
 
 getAllData();
