@@ -1,5 +1,9 @@
 # historical-contract-values-fetcher-ts
 
+Fetches historical values for a function and a contract
+
+Stores the values in a JSON file
+
 ## Usage
 
 - Add .env
